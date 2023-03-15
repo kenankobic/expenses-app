@@ -1,0 +1,83 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int        @id @default(autoincrement())
+  role         Role       @default(USER)
+  email        String     @unique
+  password     String
+  username     String
+  dateCreated  DateTime   @default(now())
+  dateModified DateTime   @default(now())
+  UserAuth     UserAuth[]
+  expenses     Expense[]
+  notes        Note[]
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+model UserAuth {
+  id           Int    @id @default(autoincrement())
+  userId       Int
+  user         User   @relation(fields: [userId], references: [id])
+  refreshToken String
+}
+
+model Expense {
+  id           Int               @id @default(autoincrement())
+  visibility   ExpenseVisibility @default(PUBLIC)
+  type         ExpenseType       @default(GROCERIES)
+  subType      String?
+  name         String
+  price        Float
+  date         DateTime          @default(now())
+  dateCreated  DateTime          @default(now())
+  dateModified DateTime          @default(now())
+  userId       Int
+  user         User              @relation(fields: [userId], references: [id])
+  forPerson    String?
+  note         String?
+  status       ExpenseStatus     @default(PENDING)
+}
+
+enum ExpenseType {
+  GROCERIES
+  CAR
+  HOUSEHOLD
+  TECH
+  TRAVEL
+  GIFTS
+  JEWELRY
+}
+
+enum ExpenseStatus {
+  PENDING
+  COMPLETED
+  CANCELED
+}
+
+enum ExpenseVisibility {
+  PUBLIC
+  PRIVATE
+}
+
+model Note {
+  id           Int      @id @default(autoincrement())
+  note         String
+  dateCreated  DateTime @default(now())
+  dateModified DateTime @default(now())
+  userId       Int
+  user         User     @relation(fields: [userId], references: [id])
+}
